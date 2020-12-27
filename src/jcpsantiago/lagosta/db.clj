@@ -3,6 +3,10 @@
             [hugsql.adapter.next-jdbc :as adapter]
             [next.jdbc :as jdbc]))
 
+(def db-data-holder
+  "Holds data collected from the db"
+  (atom {}))
+
 ;; regular SQL functions
 (hugsql/def-db-fns "sql/cases.sql"
                    {:adapter (adapter/hugsql-adapter-next-jdbc)})

@@ -1,5 +1,5 @@
 (ns jcpsantiago.lagosta.slack
-  (:require [clj-slack.file :refer [upload]]
+  (:require [clj-slack.files :refer [upload]]
             [clojure.java.io :as io]))
 
 (def slack-connection 
