@@ -24,7 +24,7 @@
     [:body {:class "bg-red-50"}
       [:main
         [:section {:class "mt-5 mx-5 md:mx-20"}
-         [:h1 {:class "font-mono 2xl mb-8 pl-1 text-indigo-500"} 
+         [:h1 {:class "font-mono 2xl mb-8 text-indigo-500"} 
           [:a {:href "#"} "Lagosta🦞"]]
          [:div {:class "grid grid-cols-1 md:grid-cols-4 gap-5"}
           [:div {:class "md:col-span-1"}
