@@ -85,9 +85,20 @@
    :th-attrs {:class "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"}
    :data-td-attrs {:class "px-6 py-4"}})
 
+(defn report-fraud-page
+  "Specific content from the fraud report page."
+  []
+  [:main
+    [:section {:class "mt-5 mx-5 md:mx-20"}
+     [:div {:class "grid grid-cols-1 md:grid-cols-4 gap-5"}
+      [:div {:class "md:col-span-1"}
+        (uuids-form "")]
+      [:div {:class "md:col-span-3"}
+        (preview-report)]]]])
 
 ;; --- SERVER --- ;;
 (defroutes report-fraud-routes
+  (GET "/publish-page" [_] (ui/base-page (report-fraud-page)))
   (POST "/uuids" req
         (info "Collecting data to show in UI")
         (let [raw-ids (get-in req [:params :selected-uuids])
