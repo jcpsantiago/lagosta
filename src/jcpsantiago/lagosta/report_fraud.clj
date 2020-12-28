@@ -26,9 +26,9 @@
   [:form {:id "uuids-form" :name "uuids-form" :hx-post "/sendtolegal"
           :hx-target "this" :hx-swap "outerHTML"}
     (anti-forgery-field)
-    [:label {:class "text-md text-gray-500 mb-2" :for "selected-uuids"} "Paste UUIDs here"]
+    [:label {:class "text-md text-gray-500 mb-2" :for "selected-uuids"} "Paste UUIDs👇"]
     [:textarea {:id "selected-uuids" :name "selected-uuids" 
-                :class "font-mono text-center text-sm text-gray-900 
+                :class "font-mono md:text-center text-xs md:text-sm text-gray-900 
                        w-full px-4 py-3 mt-2 rounded-md shadow bg-white 
                        focus:outline-none focus:ring focus:border-indigo-300"
                 :rows 10 :cols 36 :required true :value (or vs "") 
@@ -37,14 +37,7 @@
                 :hx-trigger "keyup changed"
                 :hx-indicator "#preview-indicator"}]
     [:div {:class "flex flex-row-reverse mt-1"}
-      [:button {:type "submit" 
-                :id "uuid-form-submit-btn"
-                :disabled true
-                :class "items-center px-4 py-2 border border-transparent 
-                       rounded-md shadow text-sm font-medium text-indigo-50 
-                       bg-indigo-900 focus:outline-none cursor-default
-                       focus:ring-2 focus:ring-offset-2"}
-       "Send to legal"]
+      (ui/btn-disabled "uuid-form-submit-btn" "Publish to Slack")
       (ui/spinner "uuid-form-indicator" 8)]])
 
 (def uuids-form-success
@@ -77,7 +70,7 @@
 (defn preview-report
   "Shows a preview of the data that will be in the docx, and sent to Slack"
   []
-  [:div 
+  [:div {:class "mb-5 md:mb-0"}
     [:div {:class "flex flex-row"}
       [:h2 {:class "text-md text-gray-500 mb-2"} "Report preview"]
       (ui/spinner "preview-indicator" 6)]
@@ -88,9 +81,9 @@
   {:table-attrs {:class "table-auto min-w-full divide-y divide-gray-200"}
    :thead-attrs {:class ""}
    :tbody-attrs {:class "bg-white divide-y divide-gray-200"}
-   :data-tr-attrs {:class "px-6 py-4 whitespace-nowrap text-sm"}
+   :data-tr-attrs {:class "px-6 py-4 text-sm"}
    :th-attrs {:class "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"}
-   :data-td-attrs {:class "px-6 py-4 whitespace-nowrap"}})
+   :data-td-attrs {:class "px-6 py-4"}})
 
 
 ;; --- SERVER --- ;;
@@ -108,15 +101,9 @@
           (if (empty? coll)
             (html5 {}
                    report-preview
-                   [:button {:type "submit" 
-                             :id "uuid-form-submit-btn"
-                             :hx-swap-oob "true"
-                             :disabled true
-                             :class "items-center px-4 py-2 border border-transparent 
-                                     rounded-md shadow text-sm font-medium text-white 
-                                     bg-indigo-900 focus:outline-none cursor-default
-                                     focus:ring-2 focus:ring-offset-2"}
-                    "Send to legal"])
+                   (ui/btn-disabled "uuid-form-submit-btn" 
+                                    "Publish to Slack"
+                                    {:hx-swap-oob "true"}))
             (do
              (info "Saving data in atom")
              (reset! db/db-data-holder coll)
@@ -132,7 +119,7 @@
                            rounded-md shadow text-sm font-medium text-white 
                            bg-indigo-600 hover:bg-indigo-700 focus:outline-none 
                            focus:ring-2 focus:ring-offset-2"}
-                "Send to legal"])))))
+                "Publish to Slack"])))))
 
   (GET "/uuids-form" [_]
        (html5 {}
