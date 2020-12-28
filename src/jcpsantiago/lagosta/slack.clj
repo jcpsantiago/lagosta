@@ -9,10 +9,10 @@
 (defn upload-file!
   [slack-connection file-path]
   (upload slack-connection (io/input-stream file-path) 
-          {:channels (System/getenv "LAGOSTA_CHANNEL_ID") 
-           :title "This is a file" 
-           :filename "output.docx" 
+          {:channels (System/getenv "LAGOSTA_SLACK_CHANNEL")
+           :title "Report for the police" 
+           :filename "fraud_case_letter.docx" 
            :filetype "docx" 
-           :initial_comment "👋 here's another file!"}))
+           :initial_comment "Here's another fraud case to share with the authorities."}))
 
 (def upload-letter! (partial upload-file! slack-connection))

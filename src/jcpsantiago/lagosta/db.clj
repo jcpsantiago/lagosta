@@ -11,12 +11,16 @@
 (hugsql/def-db-fns "sql/cases.sql"
                    {:adapter (adapter/hugsql-adapter-next-jdbc)})
 
+; FIXME write function that outputs this map based on the type
+; of db we want. Snowflake is needed for my testing
 (def db
-  {:dbtype "postgresql"
-   :user "emmiakfyrpxhkf"
-   :password "330f4f1893db17731bbbf4ddcbb71398ec84250d099353b64ebfd099941b6b9c"
-   :host "ec2-54-235-181-55.compute-1.amazonaws.com"
-   :port "5432"
-   :dbname "d97ric957kug10"})
+  {:dbtype "snowflake"
+   :user (System/getenv "LAGOSTA_DB_USER")
+   :password (System/getenv "LAGOSTA_DB_PASSWORD")
+   :host (System/getenv "LAGOSTA_DB_HOST")
+   :port "443"
+   :db (System/getenv "LAGOSTA_DB_DB")   
+   :roles (System/getenv "LAGOSTA_DB_ROLE")
+   :classname "net.snowflake.client.jdbc.SnowflakeDriver"})
 
 (def ds (jdbc/get-datasource db))
