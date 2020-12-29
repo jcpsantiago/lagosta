@@ -19,7 +19,8 @@
         hiccup/hiccup                           {:mvn/version "2.0.0-alpha2"}
         hiccup-table/hiccup-table               {:mvn/version "0.2.0"}
         io.github.erdos/stencil-core            {:mvn/version "0.3.11"}
-        org.julienxx/clj-slack                  {:mvn/version "0.6.3"}}
+        org.julienxx/clj-slack                  {:mvn/version "0.6.3"}
+        cheshire/cheshire                       {:mvn/version "5.10.0"}}
  :aliases
    {:test {:extra-paths ["test"]
            :extra-deps {org.clojure/test.check {:mvn/version "1.0.0"}}}

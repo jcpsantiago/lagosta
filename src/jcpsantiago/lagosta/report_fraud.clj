@@ -98,7 +98,12 @@
 
 ;; --- SERVER --- ;;
 (defroutes report-fraud-routes
-  (GET "/publish-page" [_] (ui/base-page (report-fraud-page)))
+  (GET "/publish-page" [_] (ui/base-page
+                            (ui/common-header
+                              (ui/nav-link "Publish" {} "underline")
+                              (conj (ui/nav-link "Review")
+                                    (ui/counter-label "/n-review-cases")))
+                            (report-fraud-page)))
   (POST "/uuids" req
         (info "Collecting data to show in UI")
         (let [raw-ids (get-in req [:params :selected-uuids])
