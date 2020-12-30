@@ -20,6 +20,7 @@
   [address]
   (let [urlencoded (URLEncoder/encode address)] 
     [:iframe {:class "w-full h-96"
+              :allowfullscreen true
               :src (str "https://www.google.com/maps/embed/v1/place?key="
                         gmaps-api-key
                         "&q=" urlencoded
@@ -27,11 +28,11 @@
 
 (defn website-screenshot-widget
   "Shows a screenshot of the email's domain"
-  [domain]
-  [:a {:href "http://www.google.com" :target "_blank"}
+  [url]
+  [:a {:href url :target "_blank"}
    [:img {:class "mt-4" 
           ; FIXME the target should be more dynamic i.e. an env
-          :src (str "http://localhost:2341/?url=" domain)}]])
+          :src (str "http://localhost:2341/?url=" url)}]])
 
 (defn uuid-input
   "Form to input uuid for getting db data"
@@ -52,7 +53,53 @@
                  :hx-indicator "#uuid-form-indicator"}]
         (ui/spinner "uuid-form-indicator" 8)]]])
 
-(defn review-page
+(defn review-placeholder-page
+  "Creates a container with placeholders for the fraud review page"
+  []
+  [:div {:class "mx-20"}
+    (ui/grid-cell "case-info-container"
+      [:div {:id "case-info" 
+             :hx-swap "outerHTML"
+             :class "flex"}
+       [:div {:class "w-96"}
+        [:div {:class "flex items-center w-full h-96 rounded-md border-4 border-dashed border-gray-200 border-opacity-100"}
+         [:div {:class "mx-auto w-12 text-gray-200"}
+          [:svg {:xmlns "http://www.w3.org/2000/svg"
+                 :fill "none"
+                 :viewbox "0 0 24 24"
+                 :stroke "currentColor"}
+            [:path {:stroke-linecap "round"
+                    :stroke-linejoin "round"
+                    :stroke-width "2"
+                    :d "M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 
+                       011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 
+                       1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"}]]]]
+        [:div {:class "mt-4 flex items-center w-full h-80 rounded-md border-4 border-dashed border-gray-200 border-opacity-100"}
+         [:div {:class "mx-auto w-12 text-gray-200"}
+           [:svg {:xmlns "http://www.w3.org/2000/svg"
+                  :fill "none"
+                  :viewbox "0 0 24 24"
+                  :stroke "currentColor"}
+             [:path {:stroke-linecap "round"
+                     :stroke-linejoin "round"
+                     :stroke-width "2"
+                     :d "M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 
+                       9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 
+                       3-9m-9 9a9 9 0 019-9"}]]]]]
+       [:div {:class "ml-4 flex-1"}
+        [:div {:class "flex items-center h-full h-96 rounded-md border-4 border-dashed border-gray-200 border-opacity-100"}
+         [:div {:class "mx-auto w-12 text-gray-200"}
+           [:svg {:xmlns "http://www.w3.org/2000/svg"
+                  :fill "none"
+                  :viewbox "0 0 24 24"
+                  :stroke "currentColor"} 
+             [:path {:stroke-linecap "round"
+                     :stroke-linejoin "round"
+                     :stroke-width "2"
+                     :d "M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 
+                       2 0 00-2 2v8a2 2 0 002 2z"}]]]]]])])
+  
+(defn case-info
   "Specific elements to the review fraud page."
   [uuid]
   (let [raw-data (db/get-review-by-uuid db/ds {:uuid uuid})
@@ -63,15 +110,14 @@
                     (str "http://"))
         d-address (:delivery_address raw-data)]
     [:div {:id "case-info" 
-           :class "mx-20"}
-      (ui/grid-cell "review-page-content"
-        [:div {:class "flex"}
-         [:div {:class "w-96"}
-           (static-map-widget d-address)
-           (website-screenshot-widget domain)]
-         [:div {:class "ml-8"}
-          [:h2 {:class "font-bold text-2xl"} company-name]
-          [:div {:class "grid grid-cols-6"}]]])]))
+           :hx-swap "outerHTML"
+           :class "flex"}
+     [:div {:class "w-96"}
+       (static-map-widget d-address)
+       (website-screenshot-widget domain)]
+     [:div {:class "ml-8"}
+      [:h2 {:class "font-bold text-2xl"} company-name]
+      [:div {:class "grid grid-cols-6"}]]]))
 
 (defroutes review-fraud-routes
   (GET "/review-page" [_] (ui/base-page 
@@ -80,10 +126,10 @@
                               (conj (ui/nav-link "Review" {} "underline")
                                     (ui/counter-label "/n-review-cases")))
                             (uuid-input)
-                            [:div {:id "case-info"}]))
+                            (review-placeholder-page)))
 
   (POST "/review-page" req
         (let [uuid (get-in req [:params :uuid])]
           (info "setting review page")
           (html5 
-            (review-page uuid)))))
+            (case-info uuid)))))
