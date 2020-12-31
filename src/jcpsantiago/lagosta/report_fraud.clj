@@ -26,7 +26,7 @@
   [:form {:id "uuids-form" :name "uuids-form" :hx-post "/sendtolegal"
           :hx-target "this" :hx-swap "outerHTML"}
     (anti-forgery-field)
-    [:label {:class "text-md text-gray-500 mb-2" :for "selected-uuids"} "Paste UUIDs👇"]
+    [:label {:class "text-md text-gray-500 mb-2" :for "selected-uuids"} "Order UUIDs👇"]
     [:textarea {:id "selected-uuids" :name "selected-uuids" 
                 :class "font-mono md:text-center text-xs md:text-sm text-gray-900 
                        w-full px-4 py-3 mt-2 rounded-md shadow bg-white 
@@ -102,7 +102,8 @@
                             (ui/common-header
                               (ui/nav-link "Publish" {} "underline")
                               (conj (ui/nav-link "Review")
-                                    (ui/counter-label "/n-review-cases")))
+                                    (ui/counter-label (:n-cases @db/db-data-holder)
+                                                      "/n-review-cases")))
                             (report-fraud-page)))
   (POST "/uuids" req
         (info "Collecting data to show in UI")
