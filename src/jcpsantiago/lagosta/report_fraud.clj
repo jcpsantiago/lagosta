@@ -88,13 +88,11 @@
 (defn report-fraud-page
   "Specific content from the fraud report page."
   []
-  [:main
-    [:section {:class "mt-5 mx-5 md:mx-20"}
-     [:div {:class "grid grid-cols-1 md:grid-cols-4 gap-5"}
-      [:div {:class "md:col-span-1"}
-        (uuids-form "")]
-      [:div {:class "md:col-span-3"}
-        (preview-report)]]]])
+  [:div {:class "grid grid-cols-1 md:grid-cols-4 gap-5"}
+   [:div {:class "md:col-span-1"}
+     (uuids-form "")]
+   [:div {:class "md:col-span-3"}
+     (preview-report)]])
 
 ;; --- SERVER --- ;;
 (defroutes report-fraud-routes

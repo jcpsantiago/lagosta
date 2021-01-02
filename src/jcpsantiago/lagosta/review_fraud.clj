@@ -4,7 +4,7 @@
   (:require [jcpsantiago.lagosta.ui-components :as ui]
             [jcpsantiago.lagosta.db :as db]
             [jcpsantiago.lagosta.strings :as jstrs]
-            [taoensso.timbre :refer [info]]
+            [taoensso.timbre :refer [info warn]]
             [compojure.core :refer [defroutes GET POST]]
             [hiccup.page :refer [html5]]
             [clojure.string :refer [join trim]]
@@ -36,40 +36,44 @@
 (defn uuid-input
   "Just the input field of the uuid form"
   [txt]
-  [:input {:id "uuid-input" :name "uuid" :value txt
-           :type "text" :placeholder "ab29fd12-d628-4fc7-9558-750b77d525a5"
-           :class "font-mono md:text-center text-xs md:text-sm text-gray-800 
-                       w-96 px-4 py-3 rounded-md shadow bg-white placeholder-gray-200 
-                       focus:outline-none focus:ring focus:border-indigo-300"
-           :hx-swap-oob "true"
-           :hx-post "/case-info" 
-           :hx-target "#case-info" 
-           :hx-trigger "keyup changed"
-           :hx-indicator "#uuid-form-indicator"}])
+  [:input (conj 
+            {:id "uuid-input" :name "uuid" :value txt
+             :type "text" :placeholder "ab29fd12-d628-4fc7-9558-750b77d525a5"
+             :class "font-mono md:text-center text-xs md:text-sm text-gray-800 
+                     w-96 px-4 py-3 rounded-md shadow bg-white placeholder-gray-200 
+                     focus:outline-none focus:ring focus:border-indigo-300"
+             :hx-get "/case-info" 
+             :hx-target "#case-info" 
+             :hx-indicator "#uuid-form-indicator"}
+            (if (= txt "") {} {:hx-swap-oob "true"}))])
 
 (defn uuid-form
-  "Form to input uuid for getting db data"
-  ([]
-   [:div {:class "mx-20 flex mb-4"}
-     [:form {:id "uuids-form" :name "uuids-form" :hx-post "/case-info"} 
-       (anti-forgery-field)
-       [:label {:class "block text-md text-gray-600" :for "selected-uuids"} "Order UUID👇"]
-       [:div {:class "flex items-center mt-2"}
-         (uuid-input "")
-         [:div {:class "ml-2 w-6 text-gray-600 hover:text-indigo-500 cursor-pointer" 
-                :hx-get "/case-info"
-                ; FIXME needs to update the value of the form above with the random uuid
-                :hx-trigger "click"
-                :hx-indicator "#uuid-form-indicator"
-                :hx-target "#case-info"}
-          ui/refresh-sm]
-         (ui/spinner "uuid-form-indicator" 7)]]]))
+  "Pseudo-form to input uuid for getting db data"
+  []
+  [:div {:class "mb-4"}
+    [:label {:class "block text-md text-gray-600" :for "selected-uuids"} "Order UUID👇"]
+    [:div {:class "flex items-center mt-2"}
+      (uuid-input "")
+      [:div {:class "ml-2 w-6 text-gray-600 hover:text-indigo-500 cursor-pointer" 
+             :hx-get "/case-info"
+             :hx-trigger "click"
+             :hx-indicator "#uuid-form-indicator"
+             :hx-target "#case-info"}
+       ui/refresh-sm]
+      (ui/spinner "uuid-form-indicator" 7)]])
+      ; [:div {:class ""}
+      ;  [:div {:class ""}
+      ;   [:a {:href "#"} "👎"]]
+      ;  [:div {:class ""}
+      ;   [:a {:href "#"} "🤷"]]
+      ;  [:div {:class ""}
+      ;   [:a {:href "#"} "👍"]]]]])
+
 
 (defn review-placeholder-page
   "Creates a container with placeholders for the fraud review page"
   []
   [:div {:id "case-info" 
-         :hx-swap-oob "true"
          :class "flex"}
    [:div {:class "w-96"}
     [:div {:class "mb-4 flex items-center w-full h-60 rounded-md border-4 border-dashed border-gray-200 border-opacity-100"}
@@ -150,6 +154,7 @@
                       (map (fn [[k v]] [k (jstrs/snakecase->normal v)]))
                       flatten
                       (into []))
+         review-type (:review_type case-data)
          merchant (:merchant case-data)
          first-name (:first_name case-data)
          last-name (:last_name case-data)
@@ -160,6 +165,9 @@
          phone (:phone case-data)
          company-name (:company_name case-data)
          schufa-id (:schufa_id case-data)
+         company-type (if (> (count schufa-id) 10)
+                        "sole-trader"
+                        "company")
          order-amount (:amount_gross case-data)
          email (:email case-data)
          ea-score (:emailage_score case-data)
@@ -170,24 +178,18 @@
          b-address (:billing_address case-data)
          d-address (:delivery_address case-data)]
      [:div {:id "case-info" 
-            :hx-swap-oob "true"
             :class "flex"}
       [:div {:class "w-96"}
         [:div {:class "mb-4"} 
          (website-screenshot-widget domain)]
         (static-map-widget d-address)]
       [:div {:class "ml-16"}
+       [:div {:class "inline-block text-gray-400 text-xs mb-1"} review-type]
        [:div {:class "mb-16"}
          [:h2 {:class "font-bold text-2xl text-gray-800"} company-name]
          [:div {:class "font-medium text-gray-400"} 
-          (str "at " merchant " on " created-at)]]
+          (str company-type " ordering at " merchant " on " created-at)]]
        [:div {:class "grid grid-cols-2 gap-4"}
-         [:div
-          [:h3 {:class "text-md text-indigo-500 font-medium"} "Schufa ID"]
-          (if (nil? schufa-id)
-            [:p {:class "text-md text-gray-200"} "Not available"]
-            [:p {:class "text-md"} schufa-id])]
-         [:div]
          [:div
           [:h3 {:class "text-md text-indigo-500 font-medium"} "Recipient's full name"]
           (if (nil? full-name)
@@ -230,27 +232,26 @@
   
 
 (defroutes review-fraud-routes
-  (GET "/review-page" [_] (ui/base-page 
-                            (ui/common-header
-                              (ui/nav-link "Publish")
-                              (conj (ui/nav-link "Review" {} "underline")
-                                    (ui/counter-label (:n-cases @db/db-data-holder) 
-                                                      "/n-review-cases")))
-                            (uuid-form)
-                            [:div {:class "mx-20"}
-                              (ui/grid-cell "case-info-container" (review-placeholder-page))]))
+  (GET "/review-page" [_] 
+       (ui/base-page 
+         (ui/common-header
+           (ui/nav-link "Publish")
+           (conj (ui/nav-link "Review" {} "underline")
+                 (ui/counter-label (:n-cases @db/db-data-holder) 
+                                   "/n-review-cases")))
+         (uuid-form)
+         [:div {:class ""}
+           (ui/grid-cell "case-info-container" (review-placeholder-page))]))
 
-  (GET "/case-info" [_] 
-       (let [uuid (rand-nth (:uuids @db/db-data-holder))]
-         (info "setting review page")
-         (html5 
-           (case-info uuid)
-           (uuid-input uuid))))
-
-  (POST "/case-info" req
-        (let [uuid (->> (get-in req [:params :uuid])
-                        (re-matches #"^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$"))]
-          (cond 
-            (seq uuid) (html5 (case-info uuid))
-            (= uuid "")  (html5 (review-placeholder-page))
-            :else (info "Invalid UUID"))))) 
+  (GET "/case-info" req 
+       (let [uuid (-> (get-in req [:params :uuid])
+                      jstrs/find-uuid)]
+         (cond 
+           (seq uuid) (html5 (case-info uuid))
+           (nil? uuid) (let [uuid (rand-nth (:uuids @db/db-data-holder))]
+                         (info "setting review page")
+                         (html5 
+                           (case-info uuid)
+                           (uuid-input uuid)))
+           (= uuid "")  (html5 (review-placeholder-page))
+           :else (warn "Invalid UUID"))))) 

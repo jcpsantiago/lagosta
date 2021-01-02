@@ -13,6 +13,10 @@
     [clojure.core.async :refer [thread]])
   (:gen-class))
 
+(def lagosta-ver
+  "The current version of the app, shown in the footer"
+  "0.1.0-SNAPSHOT")
+
 (defroutes all-routes
   (GET "/" [_] (ui/base-page
                  (ui/common-header

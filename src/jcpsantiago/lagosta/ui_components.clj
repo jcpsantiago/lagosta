@@ -12,8 +12,6 @@
                      "h-" size " " 
                      "mx-2 htmx-indicator")}])
 
-(def classes "underline")
-
 (defn nav-link
   "Creates a navigation link shown in the header of every page"
   ([txt]
@@ -43,16 +41,18 @@
      [:span (conj base-attrs extra-attrs) txt])))
 
 (defn common-header
-  "Creates the hiccup to construct the header seen in every page"
+  "Creates the header seen in every page"
   [& elements]
-  [:header {:class "mt-5 mx-5 md:mx-20 mb-10 md:mb-12"}
+  [:header {:class "my-5"}
    [:nav {:hx-boost "true"}
     [:div {:class "flex-1 flex items-center justify-left"}
      [:h1 {:class "font-mono 2xl text-indigo-500 mr-8"} 
       [:a {:href "/"} "Lagosta🦞"]]
      elements]]])
 
-(defn base-page [& elements]
+(defn base-page 
+  "Skeleton used for every page"
+  [header & elements]
   (html5
     {:class "" :lang "en"}
     [:head
@@ -77,7 +77,15 @@
        :name "viewport",
        :content "width=device-width, initial-scale=1.0"}]]
     [:body {:class "bg-red-50"}
-     elements]))
+     [:div {:class "flex flex-col h-screen justify-between
+                   mx-5 md:mx-20"}
+      header
+      [:main {:class "mb-auto"}
+       [:section
+         elements]]
+      [:footer {:class "mt-5"}
+       ; FIXME should be global var
+        [:p {:class "text-gray-300 text-xs"} "0.1.0-SNAPSHOT"]]]]))
 
 (defn grid-cell-extra 
   "Grid element to contain other elements"
