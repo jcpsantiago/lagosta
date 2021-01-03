@@ -18,7 +18,3 @@
 
 
 (def render-letter! (partial render-template letter-template output-path))
- 
-; (render-letter! 
-;   {:rows [{:name "foo" :address "bar 23 Berlin"} 
-;           {:name "me" :address "stallschreiber 29"}]})
